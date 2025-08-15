@@ -1,0 +1,11 @@
+export { default as logo } from "./logo.svg";
+export { default as searchIcon } from "./search.svg";
+export { default as addIcon } from "./new.svg";
+export { default as file } from "./file.svg";
+export { default as folderIcon } from "./folder-close.svg";
+export { default as addFolderIcon } from "./addfolder.svg";
+export { default as favoriteIcon } from "./favorites.svg";
+export { default as trashIcon } from "./trash.svg";
+export { default as archivedIcon } from "./archived.svg";
+export { default as calenderIcon } from "./Frame.svg";
+export { default as noteOptionIcon } from "./note-option.svg";
