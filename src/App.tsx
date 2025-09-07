@@ -9,6 +9,7 @@ import {
 } from "./theme/theme";
 
 import { useThemeStore } from "./stores/themeStore/ThemeStore";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const themeMap: Record<string, object> = {
   default: defaultTheme,
@@ -21,11 +22,15 @@ function App() {
   const currentTheme = useThemeStore((state) => state.theme);
   const selectedTheme = themeMap[currentTheme] || defaultTheme;
 
+  const queryClient = new QueryClient();
+
   return (
-    <ThemeProvider theme={selectedTheme}>
-      <CssBaseline />
-      <Layout />
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={selectedTheme}>
+        <CssBaseline />
+        <Layout />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
