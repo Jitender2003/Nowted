@@ -34,6 +34,7 @@ export const Note = () => {
       bgcolor={theme.palette.primary.dark}
       padding={theme.spacing(6.2)}
       spacing={theme.spacing(3.6)}
+      overflow="auto"
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography variant="h1">Reflection on the Month of June</Typography>

@@ -44,6 +44,7 @@ export const Sidebar = () => {
       paddingX={theme.spacing(2.5)}
       paddingY={theme.spacing(3.6)}
       bgcolor={theme.palette.primary.dark}
+      overflow="auto"
     >
       {/* logo section */}
       <Stack

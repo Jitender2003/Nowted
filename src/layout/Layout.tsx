@@ -11,7 +11,7 @@ export const Layout = () => {
         <Route
           path="/Nowted"
           element={
-            <Stack height="100vh" width="100vw" direction="row">
+            <Stack direction="row" margin="0px" padding="0px">
               <Sidebar />
               <Folder />
               <Note />
@@ -21,13 +21,24 @@ export const Layout = () => {
           <Route
             path="folders/:folderid"
             element={
-              <Stack height="100vh" width="100vw" direction="row">
+              <Stack direction="row">
                 <Sidebar />
                 <Folder />
                 <Note />
               </Stack>
             }
-          />
+          >
+            <Route
+              path="notes/:noteid"
+              element={
+                <Stack direction="row" margin="0px" padding="0px">
+                  <Sidebar />
+                  <Folder />
+                  <Note />
+                </Stack>
+              }
+            ></Route>
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

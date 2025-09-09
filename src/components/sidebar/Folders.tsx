@@ -4,20 +4,15 @@ import { StyledIconButton } from "../../uiComponents/StyledIconButton";
 import { StyledStack } from "../../uiComponents/StyledStack";
 import { useGetFolders } from "../../hooks/api.hooks";
 import { useNavigate } from "react-router-dom";
+import { NoteSkeleton } from "../../loader/Skeletonnote&folderloader";
 
 export const Folders = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { data: folderList } = useGetFolders();
-  console.log(folderList);
+  const { isLoading: folderListLoading, data: folderList } = useGetFolders();
 
   return (
-    <Stack
-      spacing={theme.spacing(1)}
-      width="100%"
-      maxHeight={theme.spacing(31)}
-      overflow="auto"
-    >
+    <Stack spacing={theme.spacing(1)} width="100%">
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography variant="h5" color={theme.palette.text.secondary}>
           Folders
@@ -33,16 +28,19 @@ export const Folders = () => {
       </Stack>
       <Stack
         spacing={theme.spacing(0.6)}
+        maxHeight={theme.spacing(15)}
         sx={{
-          overflow: "auto",
+          overflowY: "auto",
           scrollbarWidth: "none",
           "&::-webkit-scrollbar": {
             display: "none",
           },
         }}
       >
-        {folderList &&
-          folderList.map((folder) => (
+        {folderListLoading ? (
+          <NoteSkeleton />
+        ) : (
+          folderList?.map((folder) => (
             <StyledStack
               direction="row"
               spacing={theme.spacing(2)}
@@ -59,7 +57,8 @@ export const Folders = () => {
                 {folder.name}
               </Typography>
             </StyledStack>
-          ))}
+          ))
+        )}
       </Stack>
     </Stack>
   );

@@ -28,3 +28,10 @@ export interface NoteData {
 export interface RecentNotesResponseData {
   recentNotes: NoteData[];
 }
+
+export interface NoteListResponseData {
+  id: string;
+  name: string;
+  preview_content: string;
+  formatted_date: string;
+}

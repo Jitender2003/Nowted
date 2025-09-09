@@ -2,25 +2,39 @@ import { Box, Stack, Typography, useTheme, type Theme } from "@mui/material";
 import { file } from "../../assets";
 import styled from "@emotion/styled";
 import { useGetRecentNotes } from "../../hooks/api.hooks";
+import { NoteSkeleton } from "../../loader/Skeletonnote&folderloader";
 
 export const Recents = () => {
   const theme = useTheme();
-  const { data: recentnotes } = useGetRecentNotes();
-  console.log(recentnotes);
+  const { isLoading: recentnotesLoading, data: recentnotes } =
+    useGetRecentNotes();
 
   return (
     <Stack spacing={theme.spacing(1)} width="100%">
       <Typography variant="h5" color={theme.palette.text.secondary}>
         Recents
       </Typography>
-      <Stack spacing={theme.spacing(0.6)}>
-        {recentnotes &&
-          recentnotes.recentNotes.map((note) => {
+      <Stack
+        maxHeight={theme.spacing(20)}
+       
+        spacing={theme.spacing(0.6)}
+        sx={{
+          overflowY: "auto",
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": {
+            display: "none",
+          },
+        }}
+      >
+        {recentnotesLoading ? (
+          <NoteSkeleton />
+        ) : (
+          recentnotes?.recentNotes.map((note) => {
             return (
               <StyledStack
                 direction="row"
                 spacing={theme.spacing(2)}
-                id={note.note.id}
+                key={note.note.id}
               >
                 <Box
                   component="img"
@@ -33,7 +47,8 @@ export const Recents = () => {
                 </Typography>
               </StyledStack>
             );
-          })}
+          })
+        )}
       </Stack>
     </Stack>
   );
