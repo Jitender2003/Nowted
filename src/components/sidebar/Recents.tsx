@@ -1,49 +1,39 @@
 import { Box, Stack, Typography, useTheme, type Theme } from "@mui/material";
 import { file } from "../../assets";
 import styled from "@emotion/styled";
+import { useGetRecentNotes } from "../../hooks/api.hooks";
 
 export const Recents = () => {
   const theme = useTheme();
+  const { data: recentnotes } = useGetRecentNotes();
+  console.log(recentnotes);
+
   return (
     <Stack spacing={theme.spacing(1)} width="100%">
       <Typography variant="h5" color={theme.palette.text.secondary}>
         Recents
       </Typography>
       <Stack spacing={theme.spacing(0.6)}>
-        <StyledStack direction="row" spacing={theme.spacing(2)}>
-          <Box
-            component="img"
-            width={theme.spacing(2.5)}
-            height={theme.spacing(2.5)}
-            src={file}
-          ></Box>
-          <Typography variant="h6" color={theme.palette.text.secondary}>
-            Day in a life
-          </Typography>
-        </StyledStack>
-
-        <StyledStack direction="row" spacing={theme.spacing(2)}>
-          <Box
-            component="img"
-            width={theme.spacing(2.5)}
-            height={theme.spacing(2.5)}
-            src={file}
-          ></Box>
-          <Typography variant="h6" color={theme.palette.text.secondary}>
-            Day in a life
-          </Typography>
-        </StyledStack>
-        <StyledStack direction="row" spacing={theme.spacing(2)}>
-          <Box
-            component="img"
-            width={theme.spacing(2.5)}
-            height={theme.spacing(2.5)}
-            src={file}
-          ></Box>
-          <Typography variant="h6" color={theme.palette.text.secondary}>
-            Day in a life
-          </Typography>
-        </StyledStack>
+        {recentnotes &&
+          recentnotes.recentNotes.map((note) => {
+            return (
+              <StyledStack
+                direction="row"
+                spacing={theme.spacing(2)}
+                id={note.note.id}
+              >
+                <Box
+                  component="img"
+                  width={theme.spacing(2.5)}
+                  height={theme.spacing(2.5)}
+                  src={file}
+                ></Box>
+                <Typography variant="h6" color={theme.palette.text.secondary}>
+                  {note.note.name}
+                </Typography>
+              </StyledStack>
+            );
+          })}
       </Stack>
     </Stack>
   );

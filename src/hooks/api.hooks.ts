@@ -1,13 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import type {
+  RecentNotesResponseData,
+  FoldersResponseData,
+} from "../types/interface";
 
 const publicAxios = axios.create({
   baseURL: "http://localhost:3000",
   headers: { "Content-Type": "application/json" },
 });
 
+// get recent notes
+export const useGetRecentNotes = () => {
+  return useQuery<RecentNotesResponseData>({
+    queryKey: ["recentnotes"],
+    queryFn: async () => {
+      const response = await publicAxios.get("/notes/recent");
+      return response.data;
+    },
+
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
+};
+//
 export const useGetFolders = () => {
-  return useQuery({
+  return useQuery<FoldersResponseData>({
     queryKey: ["folders"],
     queryFn: async () => {
       const response = await publicAxios.get("/folders");
