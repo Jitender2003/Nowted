@@ -34,4 +34,6 @@ export interface NoteListResponseData {
   name: string;
   preview_content: string;
   formatted_date: string;
+  folder_name: string;
+  folder_id: string;
 }

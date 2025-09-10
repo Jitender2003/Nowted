@@ -1,5 +1,12 @@
 import styled from "@emotion/styled";
-import { Box, Stack, Typography, useTheme, type Theme } from "@mui/material";
+import {
+  Box,
+  Skeleton,
+  Stack,
+  Typography,
+  useTheme,
+  type Theme,
+} from "@mui/material";
 import { BackgroundBeams } from "../ui/background-beams";
 // import { useNavigate } from "react-router-dom";
 import { useGetNote } from "../../hooks/api.hooks";
@@ -8,9 +15,14 @@ import { useNavigate, useParams } from "react-router-dom";
 export const Folder = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { folderid } = useParams<{ folderid: string }>();
+  const { folderid, noteid } = useParams<{
+    folderid: string;
+    noteid: string;
+  }>();
 
-  const { data: noteList } = useGetNote({ folderid: folderid });
+  const { isLoading: noteListLoading, data: noteList } = useGetNote({
+    folderid: folderid,
+  });
 
   return (
     <Stack
@@ -23,7 +35,11 @@ export const Folder = () => {
       height="100vh"
       overflow="auto"
     >
-      <Typography variant="h2">Personal</Typography>
+      {noteListLoading ? (
+        <Skeleton variant="text" width="45%" height={theme.spacing(4.5)} />
+      ) : (
+        <Typography variant="h2">{noteList?.[0].folder_name || "No folder"}</Typography>
+      )}
       <Stack spacing={theme.spacing(3.6)} zIndex={1}>
         {noteList &&
           noteList.map((note) => {
@@ -32,6 +48,12 @@ export const Folder = () => {
                 spacing={theme.spacing(1.5)}
                 key={note.id}
                 onClick={() => navigate(`folders/${folderid}/notes/${note.id}`)}
+                sx={{
+                  bgcolor:
+                    note.id === noteid
+                      ? theme.palette.primary.light
+                      : theme.palette.primary.main,
+                }}
               >
                 <Typography variant="h3">{note.name}</Typography>
                 <Stack direction="row" justifyContent="space-between">
@@ -69,7 +91,6 @@ export const Folder = () => {
 };
 
 const StyledStack = styled(Stack)<{ theme?: Theme }>(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
   padding: theme.spacing(2.5),
   borderRadius: theme.spacing(1),
 

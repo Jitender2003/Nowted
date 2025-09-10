@@ -1,4 +1,11 @@
-import { Box, ButtonBase, Popover, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  ButtonBase,
+  Popover,
+  Skeleton,
+  Stack,
+  Typography,
+} from "@mui/material";
 import {
   archivedIcon,
   calenderIcon,
@@ -11,9 +18,12 @@ import { styled, useTheme, type Theme } from "@mui/material/styles";
 import { StyledIconButton } from "../../uiComponents/StyledIconButton";
 import { useState } from "react";
 import { StyledDivider } from "../../uiComponents/StyledDivider";
+import { useParams } from "react-router-dom";
+import { useGetNoteById } from "../../hooks/api.hooks";
 
 export const Note = () => {
   const theme = useTheme();
+  const { noteid } = useParams<{ noteid: string }>();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -27,6 +37,9 @@ export const Note = () => {
 
   const open = Boolean(anchorEl);
 
+  const { isLoading: noteLoading, data: note } = useGetNoteById(noteid);
+  console.log(note);
+
   return (
     <Stack
       flex="1"
@@ -37,7 +50,11 @@ export const Note = () => {
       overflow="auto"
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Typography variant="h1">Reflection on the Month of June</Typography>
+        {noteLoading ? (
+          <Skeleton variant="text" width={1500} height={theme.spacing(5)} />
+        ) : (
+          <Typography variant="h1">{note?.note.title}</Typography>
+        )}
 
         <Stack position="relative">
           <StyledIconButton onClick={handleNoteOptions}>
@@ -114,9 +131,13 @@ export const Note = () => {
             width={theme.spacing(2.5)}
             height={theme.spacing(2.5)}
           ></Box>
-          <Typography variant="h4" color={theme.palette.text.secondary}>
-            21/06/2022
-          </Typography>
+          {noteLoading ? (
+            <Skeleton variant="text" width="15%" />
+          ) : (
+            <Typography variant="h4" color={theme.palette.text.secondary}>
+              {note?.note.formatted_date}
+            </Typography>
+          )}
         </Stack>
         <Stack direction="row" spacing={theme.spacing(2)} alignItems="center">
           <Box
@@ -125,21 +146,28 @@ export const Note = () => {
             height={theme.spacing(2.5)}
             src={folderIcon}
           ></Box>
-          <Typography variant="h5" color={theme.palette.text.secondary}>
-            Personal
-          </Typography>
+          {noteLoading ? (
+            <Skeleton variant="text" width="15%" />
+          ) : (
+            <Typography variant="h5" color={theme.palette.text.secondary}>
+              {note?.note.folder.name}
+            </Typography>
+          )}
         </Stack>
       </Stack>
 
       <Stack spacing={theme.spacing(1.5)}>
         <StyledDivider />
-        <Typography variant="h4">
-          It's hard to believe that June is already over! Looking back on the
-          month, there were a few highlights that stand out to me. One of the
-          best things that happened was getting promoted at work. I've been
-          working really hard and it's great to see that effort recognized. It's
-          also exciting to have more responsibility and the opportunity to
-        </Typography>
+        {noteLoading ? (
+          <Stack spacing={0.5}>
+            <Skeleton variant="text" width="100%" />
+            <Skeleton variant="text" width="90%" />
+            <Skeleton variant="text" width="95%" />
+            <Skeleton variant="text" width="80%" />
+          </Stack>
+        ) : (
+          <Typography variant="h4">{note?.note.content}</Typography>
+        )}
       </Stack>
     </Stack>
   );

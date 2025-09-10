@@ -3,9 +3,12 @@ import { file } from "../../assets";
 import styled from "@emotion/styled";
 import { useGetRecentNotes } from "../../hooks/api.hooks";
 import { NoteSkeleton } from "../../loader/Skeletonnote&folderloader";
+import { useNavigate, useParams } from "react-router-dom";
 
 export const Recents = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const { noteid } = useParams<{ noteid: string }>();
   const { isLoading: recentnotesLoading, data: recentnotes } =
     useGetRecentNotes();
 
@@ -16,7 +19,6 @@ export const Recents = () => {
       </Typography>
       <Stack
         maxHeight={theme.spacing(20)}
-       
         spacing={theme.spacing(0.6)}
         sx={{
           overflowY: "auto",
@@ -35,6 +37,17 @@ export const Recents = () => {
                 direction="row"
                 spacing={theme.spacing(2)}
                 key={note.note.id}
+                onClick={() =>
+                  navigate(
+                    `folders/${note.note.folder.id}/notes/${note.note.id}`
+                  )
+                }
+                sx={{
+                  bgcolor:
+                    note.note.id === noteid
+                      ? theme.palette.secondary.main
+                      : "transparent",
+                }}
               >
                 <Box
                   component="img"

@@ -46,7 +46,7 @@ export const useGetFolders = () => {
   });
 };
 
-// get notes
+// get notes =
 export const useGetNote = (params: GetNotesParams) => {
   return useQuery<NoteListResponseData[]>({
     queryKey: ["notes", params],
@@ -56,5 +56,19 @@ export const useGetNote = (params: GetNotesParams) => {
     },
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
+  });
+};
+
+// get note by id
+export const useGetNoteById = (noteid?: string) => {
+  return useQuery({
+    queryKey: ["notes", noteid],
+    queryFn: async () => {
+      const response = await publicAxios.get(`/notes/${noteid}`);
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+    enabled: !!noteid,
   });
 };

@@ -3,13 +3,14 @@ import { addFolderIcon, folderIcon } from "../../assets";
 import { StyledIconButton } from "../../uiComponents/StyledIconButton";
 import { StyledStack } from "../../uiComponents/StyledStack";
 import { useGetFolders } from "../../hooks/api.hooks";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { NoteSkeleton } from "../../loader/Skeletonnote&folderloader";
 
 export const Folders = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { isLoading: folderListLoading, data: folderList } = useGetFolders();
+  const { folderid } = useParams<{ folderid: string }>();
 
   return (
     <Stack spacing={theme.spacing(1)} width="100%">
@@ -46,6 +47,12 @@ export const Folders = () => {
               spacing={theme.spacing(2)}
               key={folder.id}
               onClick={() => navigate(`folders/${folder.id}`)}
+              sx={{
+                bgcolor:
+                  folder.id === folderid
+                    ? theme.palette.primary.light
+                    : "transparent",
+              }}
             >
               <Box
                 component="img"
