@@ -38,7 +38,9 @@ export const Folder = () => {
       {noteListLoading ? (
         <Skeleton variant="text" width="45%" height={theme.spacing(4.5)} />
       ) : (
-        <Typography variant="h2">{noteList?.[0].folder_name || "No folder"}</Typography>
+        <Typography variant="h2">
+          {noteList?.[0]?.folder_name || "No folder"}
+        </Typography>
       )}
       <Stack spacing={theme.spacing(3.6)} zIndex={1}>
         {noteList &&
@@ -71,7 +73,6 @@ export const Folder = () => {
       {theme.palette.customTheme === "midnight" && (
         <Box
           position="absolute"
-          // bgcolor="tomato"
           top={-30}
           left={0}
           right={0}

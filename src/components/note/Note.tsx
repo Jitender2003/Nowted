@@ -20,6 +20,7 @@ import { useState } from "react";
 import { StyledDivider } from "../../uiComponents/StyledDivider";
 import { useParams } from "react-router-dom";
 import { useGetNoteById } from "../../hooks/api.hooks";
+import { EmptyNote } from "./EmptyNote";
 
 export const Note = () => {
   const theme = useTheme();
@@ -38,7 +39,10 @@ export const Note = () => {
   const open = Boolean(anchorEl);
 
   const { isLoading: noteLoading, data: note } = useGetNoteById(noteid);
-  console.log(note);
+
+  if (!noteid) {
+    return <EmptyNote />;
+  }
 
   return (
     <Stack
