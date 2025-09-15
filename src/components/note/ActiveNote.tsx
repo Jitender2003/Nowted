@@ -10,6 +10,7 @@ import {
 import {
   archivedIcon,
   calenderIcon,
+  favoriteFillIcon,
   favoriteIcon,
   folderIcon,
   noteOptionIcon,
@@ -17,19 +18,35 @@ import {
 } from "../../assets";
 import { styled, useTheme, type Theme } from "@mui/material/styles";
 import { StyledIconButton } from "../../uiComponents/StyledIconButton";
-import { useParams } from "react-router-dom";
-import { useGetNoteById, usePatchNote } from "../../hooks/api.hooks";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  useDeleteNote,
+  useGetNoteById,
+  usePatchNote,
+} from "../../hooks/api.hooks";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { StyledDivider } from "../../uiComponents/StyledDivider";
 import { useDebounceCallback } from "../../hooks/Debounce";
 
 export const ActiveNote = () => {
   const theme = useTheme();
-  const { noteid } = useParams<{ noteid: string }>();
+  const { noteid, folderid, favorite, archived, deleted } = useParams<{
+    noteid: string;
+    folderid: string;
+    favorite: string;
+    archived: string;
+    deleted: string;
+  }>();
   const [noteContent, setNoteContent] = useState<string>("");
   const [noteHeader, setNoteHeader] = useState<string>("");
+  const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const { isLoading: noteLoading, data: note } = useGetNoteById(noteid);
+  const { mutate: patchNote } = usePatchNote(noteid);
+  const { mutate: deleteNote } = useDeleteNote();
 
   const handleNoteOptions = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -38,11 +55,61 @@ export const ActiveNote = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  const handleFavoriteNote = (isFavorite: boolean) => {
+    patchNote(
+      { isFavorite: !isFavorite },
+      {
+        onSuccess: () => {
+          if (favorite) {
+            navigate(`/Nowted/favorite`);
+          } else if (archived) {
+            navigate(`/Nowted/archived`);
+          }
+        },
+      }
+    );
+    setAnchorEl(null);
+  };
 
-  const open = Boolean(anchorEl);
+  const handleArchiveNote = (isArchive: boolean) => {
+    patchNote(
+      { isArchived: !isArchive },
+      {
+        onSuccess: () => {
+          if (favorite) {
+            navigate(`/Nowted/favorite`);
+          } else if (archived) {
+            navigate(`/Nowted/archived`);
+          } else {
+            navigate(`/Nowted/folders/${folderid}`);
+          }
+        },
+      }
+    );
 
-  const { isLoading: noteLoading, data: note } = useGetNoteById(noteid);
-  const { mutate: patchNote } = usePatchNote(noteid);
+    setAnchorEl(null);
+  };
+
+  const handleNoteDelete = (isDelete: boolean) => {
+    if (!isDelete) {
+      deleteNote(
+        { id: noteid },
+        {
+          onSuccess: () => {
+            if (favorite) {
+              navigate(`/Nowted/favorite`);
+            } else if (archived) {
+              navigate(`/Nowted/archived`);
+            } else {
+              navigate(`/Nowted/folders/${folderid}`);
+            }
+          },
+        }
+      );
+    }
+    setAnchorEl(null);
+  };
+
   const debouncePatchNoteContent = useDebounceCallback(
     (value: string) => patchNote({ content: value }),
     2000
@@ -71,6 +138,7 @@ export const ActiveNote = () => {
     setNoteHeader(e.target.value);
     debouncePatchNotetitle(e.target.value);
   };
+  console.log(note);
 
   return (
     <Stack
@@ -85,85 +153,105 @@ export const ActiveNote = () => {
         {noteLoading ? (
           <Skeleton variant="text" width={1500} height={theme.spacing(5)} />
         ) : (
-          <TextField
-            variant="standard"
-            value={noteHeader}
-            onChange={(e) => handleHeaderChange(e)}
-            InputProps={{
-              disableUnderline: true,
-            }}
-            inputProps={{
-              style: { ...theme.typography.h1 },
-            }}
-            fullWidth
-          />
-        )}
-
-        <Stack position="relative">
-          <StyledIconButton onClick={handleNoteOptions}>
-            <Box
-              component="img"
-              width={theme.spacing(2.5)}
-              height={theme.spacing(2.5)}
-              src={noteOptionIcon}
+          <>
+            <TextField
+              variant="standard"
+              value={noteHeader}
+              onChange={(e) => handleHeaderChange(e)}
+              InputProps={{
+                disableUnderline: true,
+              }}
+              inputProps={{
+                style: { ...theme.typography.h1 },
+              }}
+              fullWidth
             />
-          </StyledIconButton>
+            <Stack position="relative">
+              <StyledIconButton onClick={handleNoteOptions}>
+                <Box
+                  component="img"
+                  width={theme.spacing(2.5)}
+                  height={theme.spacing(2.5)}
+                  src={noteOptionIcon}
+                />
+              </StyledIconButton>
 
-          <Popover
-            open={open}
-            anchorEl={anchorEl}
-            onClose={handleClose}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "right",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-            PaperProps={{
-              sx: {
-                backgroundColor: "rgba(255, 255, 255, 0.06)",
-                backdropFilter: "blur(10px)",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-                boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
-                borderRadius: theme.spacing(1.5),
-                p: theme.spacing(2),
-                mt: theme.spacing(1),
-              },
-            }}
-          >
-            <Stack spacing={theme.spacing(1)} width={theme.spacing(24)}>
-              <StyledStack onClick={handleClose}>
-                <Box
-                  component="img"
-                  width={theme.spacing(2.5)}
-                  height={theme.spacing(2.5)}
-                  src={favoriteIcon}
-                />
-                <Typography variant="h4">Add to favorites</Typography>
-              </StyledStack>
-              <StyledStack onClick={handleClose}>
-                <Box
-                  component="img"
-                  width={theme.spacing(2.5)}
-                  height={theme.spacing(2.5)}
-                  src={archivedIcon}
-                />
-                <Typography variant="h4">Archived</Typography>
-              </StyledStack>
-              <StyledStack onClick={handleClose}>
-                <Box
-                  component="img"
-                  width={theme.spacing(2.5)}
-                  height={theme.spacing(2.5)}
-                  src={trashIcon}
-                />
-                <Typography variant="h4">Delete</Typography>
-              </StyledStack>
+              <Popover
+                open={open}
+                anchorEl={anchorEl}
+                onClose={handleClose}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                PaperProps={{
+                  sx: {
+                    backgroundColor: "rgba(255, 255, 255, 0.06)",
+                    backdropFilter: "blur(10px)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
+                    borderRadius: theme.spacing(1.5),
+                    p: theme.spacing(2),
+                    mt: theme.spacing(1),
+                  },
+                }}
+              >
+                <Stack spacing={theme.spacing(1)} width={theme.spacing(24)}>
+                  <StyledStack
+                    onClick={() => {
+                      handleFavoriteNote(note?.note?.isFavorite);
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      width={theme.spacing(2.5)}
+                      height={theme.spacing(2.5)}
+                      src={
+                        note?.note?.isFavorite ? favoriteFillIcon : favoriteIcon
+                      }
+                    />
+                    <Typography variant="h4">favorite</Typography>
+                  </StyledStack>
+                  <StyledStack
+                    onClick={() => {
+                      handleArchiveNote(note?.note?.isArchived);
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      width={theme.spacing(2.5)}
+                      height={theme.spacing(2.5)}
+                      src={archivedIcon}
+                    />
+                    <Typography variant="h4">
+                      {" "}
+                      {note?.note?.isArchived ? "Archived" : "Archive"}
+                    </Typography>
+                  </StyledStack>
+                  <StyledStack
+                    onClick={() => {
+                      handleNoteDelete(note?.note?.isDeleted);
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      width={theme.spacing(2.5)}
+                      height={theme.spacing(2.5)}
+                      src={trashIcon}
+                    />
+                    <Typography variant="h4">
+                      {note?.note?.isDeleted ? "Deleted" : "Delete"}
+                    </Typography>
+                  </StyledStack>
+                </Stack>
+              </Popover>
             </Stack>
-          </Popover>
-        </Stack>
+          </>
+        )}
       </Stack>
 
       <Stack spacing={theme.spacing(2)}>

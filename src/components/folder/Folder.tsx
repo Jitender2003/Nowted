@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { BackgroundBeams } from "../ui/background-beams";
 // import { useNavigate } from "react-router-dom";
-import { useGetNote } from "../../hooks/api.hooks";
+import { useGetNote, type GetNotesParams } from "../../hooks/api.hooks";
 import { useNavigate, useParams } from "react-router-dom";
 import { EmptyFolder } from "./EmptyFolder";
 import { NoteListSkeleton } from "../../loader/NoteListSkeleton";
@@ -21,10 +21,21 @@ export const Folder = () => {
     folderid: string;
     noteid: string;
   }>();
+  const params: GetNotesParams = {};
 
-  const { isLoading: noteListLoading, data: noteList } = useGetNote({
-    folderid: folderid,
-  });
+  if (folderid) {
+    params.folderid = folderid;
+    params.archived = false;
+    params.deleted = false;
+  } else if (location.pathname.includes("favorite")) {
+    params.favorite = true;
+  } else if (location.pathname.includes("archived")) {
+    params.archived = true;
+  } else if (location.pathname.includes("deleted")) {
+    params.deleted = true;
+  }
+
+  const { isLoading: noteListLoading, data: noteList } = useGetNote(params);
   console.log("folderdata", noteList);
 
   if (!folderid) {

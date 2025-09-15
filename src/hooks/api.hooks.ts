@@ -6,7 +6,7 @@ import type {
   NoteListResponseData,
 } from "../types/interface";
 
-type GetNotesParams = {
+export type GetNotesParams = {
   folderid?: string;
   archived?: boolean;
   favorite?: boolean;
@@ -17,8 +17,8 @@ type GetNotesParams = {
 type PatchNoteParams = {
   name?: string;
   content?: string;
-  isFavorite?: string;
-  isArchived?: string;
+  isFavorite?: boolean;
+  isArchived?: boolean;
 };
 
 type PatchFolderParams = {
@@ -34,6 +34,10 @@ type CreateNoteParams = {
 
 type CreateFolderParams = {
   name: string;
+};
+
+type DeleteNoteParams = {
+  id?: string;
 };
 
 const publicAxios = axios.create({
@@ -162,6 +166,24 @@ export const usePatchFolder = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["folders"] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+};
+
+// delete note
+
+export const useDeleteNote = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: DeleteNoteParams) => {
+      const response = await publicAxios.delete(`/notes/${data.id}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["recentnotes"] });
     },
   });
 };
