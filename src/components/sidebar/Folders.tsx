@@ -2,7 +2,11 @@ import { Box, Stack, TextField, Typography, useTheme } from "@mui/material";
 import { addFolderIcon, folderIcon } from "../../assets";
 import { StyledIconButton } from "../../uiComponents/StyledIconButton";
 import { StyledStack } from "../../uiComponents/StyledStack";
-import { useCreateNewFolder, useGetFolders } from "../../hooks/api.hooks";
+import {
+  useCreateNewFolder,
+  useGetFolders,
+  usePatchFolder,
+} from "../../hooks/api.hooks";
 import { useNavigate, useParams } from "react-router-dom";
 import { NoteSkeleton } from "../../loader/Skeletonnote&folderloader";
 import { useEffect, useState, type ChangeEvent } from "react";
@@ -14,8 +18,11 @@ export const Folders = () => {
   const { folderid } = useParams<{ folderid: string }>();
   const [isCreatNewFolder, setIsCreateNewFolder] = useState<boolean>(false);
   const [foldertitle, setFolderTitle] = useState<string>("");
+  const [editFolderId, setEditFolderId] = useState<string>("");
+  const [folderName, setFolderName] = useState<string>("");
 
   const { mutate: createNewFolder } = useCreateNewFolder();
+  const { mutate: updateFolder } = usePatchFolder();
 
   const handleCreateNewFolder = () => {
     setIsCreateNewFolder(!isCreatNewFolder);
@@ -49,6 +56,16 @@ export const Folders = () => {
       navigate(`folders/${folderList[0].id}`, { replace: true });
     }
   }, [folderListLoading, folderList, folderid, navigate]);
+
+  const handleFolderTitleEdit = (folderid: string, foldername: string) => {
+    setEditFolderId(folderid);
+    setFolderName(foldername);
+  };
+
+  const handleSaveFolder = (folderid: string, foldername: string) => {
+    updateFolder({ name: foldername, id: folderid });
+    setEditFolderId("");
+  };
 
   return (
     <Stack spacing={theme.spacing(1)} width="100%">
@@ -125,9 +142,52 @@ export const Folders = () => {
                 height={theme.spacing(2.5)}
                 src={folderIcon}
               />
-              <Typography variant="h6" color={theme.palette.text.secondary}>
-                {folder.name}
-              </Typography>
+              {folder.id === editFolderId ? (
+                <TextField
+                  value={folderName}
+                  onChange={(e) => setFolderName(e.target.value)}
+                  onBlur={() => handleSaveFolder(folder.id, folderName)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSaveFolder(folder.id, folderName);
+                    }
+                  }}
+                  autoFocus
+                  size="small"
+                  variant="standard"
+                  InputProps={{
+                    disableUnderline: true,
+
+                    style: {
+                      ...theme.typography.h6,
+                      padding: 0,
+                      margin: 0,
+                      height: "auto",
+                      minHeight: 0,
+                      lineHeight: theme.typography.h6.lineHeight,
+                    },
+                  }}
+                  inputProps={{
+                    style: {
+                      padding: 0,
+                      margin: 0,
+                      height: "auto",
+                      lineHeight: theme.typography.h6.lineHeight,
+                    },
+                  }}
+                />
+              ) : (
+                <Typography
+                  variant="h6"
+                  color={theme.palette.text.secondary}
+                  onDoubleClick={() =>
+                    handleFolderTitleEdit(folder.id, folder.name)
+                  }
+                >
+                  {folder.name}
+                </Typography>
+              )}
             </StyledStack>
           ))
         )}

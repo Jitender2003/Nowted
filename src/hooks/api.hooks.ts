@@ -21,6 +21,11 @@ type PatchNoteParams = {
   isArchived?: string;
 };
 
+type PatchFolderParams = {
+  name: string;
+  id: string;
+};
+
 type CreateNoteParams = {
   folderid: string;
   name: string;
@@ -140,6 +145,23 @@ export const usePatchNote = (id?: string) => {
     },
     onError: (error) => {
       console.error("Failed to create note:", error.message);
+    },
+  });
+};
+
+// patch folder content
+export const usePatchFolder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: PatchFolderParams) => {
+      const response = await publicAxios.patch(`/folders/${data.id}`, {
+        name: data.name,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
     },
   });
 };
