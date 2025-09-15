@@ -5,12 +5,24 @@ import { StyledStack } from "../../uiComponents/StyledStack";
 import { useGetFolders } from "../../hooks/api.hooks";
 import { useNavigate, useParams } from "react-router-dom";
 import { NoteSkeleton } from "../../loader/Skeletonnote&folderloader";
+import { useEffect } from "react";
 
 export const Folders = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { isLoading: folderListLoading, data: folderList } = useGetFolders();
   const { folderid } = useParams<{ folderid: string }>();
+
+  useEffect(() => {
+    if (
+      !folderListLoading &&
+      folderList &&
+      folderList.length > 0 &&
+      !folderid
+    ) {
+      navigate(`folders/${folderList[0].id}`, { replace: true });
+    }
+  }, [folderListLoading, folderList, folderid, navigate]);
 
   return (
     <Stack spacing={theme.spacing(1)} width="100%">

@@ -37,3 +37,8 @@ export interface NoteListResponseData {
   folder_name: string;
   folder_id: string;
 }
+
+export interface CreateNoteResoponseData {
+  message: string;
+  noteid: number;
+}

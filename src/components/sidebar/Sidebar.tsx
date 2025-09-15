@@ -18,14 +18,20 @@ import type { Theme } from "@mui/material/styles";
 import { useThemeStore } from "../../stores/themeStore/ThemeStore";
 import { StyledIconButton } from "../../uiComponents/StyledIconButton";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useCreateNewNote } from "../../hooks/api.hooks";
 
 export const Sidebar = () => {
   const theme = useTheme();
 
   const [isSearch, setIsSearch] = useState(false);
+  const { folderid } = useParams<{ folderid: string }>();
 
   const appTheme = useThemeStore((state) => state.theme);
   const updateThemeChange = useThemeStore((state) => state.setTheme);
+
+  const { mutate: createNote } = useCreateNewNote();
+  const navigate = useNavigate();
 
   const handleAppThemeChange = (e: SelectChangeEvent) => {
     updateThemeChange(e.target.value);
@@ -34,6 +40,22 @@ export const Sidebar = () => {
 
   const handleSearch = () => {
     setIsSearch((prev) => !prev);
+  };
+
+  const handleCreateNewNote = () => {
+    if (!folderid) return;
+    createNote(
+      {
+        folderid,
+        name: "Title",
+        content: "Start Typing...",
+      },
+      {
+        onSuccess: (data) => {
+          navigate(`folders/${folderid}/notes/${data.noteid}`);
+        },
+      }
+    );
   };
 
   return (
@@ -84,6 +106,7 @@ export const Sidebar = () => {
                 height={theme.spacing(2.5)}
               />
             }
+            onClick={handleCreateNewNote}
           >
             <Typography variant="h6">New Note</Typography>
           </StyledFilledButton>

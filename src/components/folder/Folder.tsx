@@ -11,6 +11,8 @@ import { BackgroundBeams } from "../ui/background-beams";
 // import { useNavigate } from "react-router-dom";
 import { useGetNote } from "../../hooks/api.hooks";
 import { useNavigate, useParams } from "react-router-dom";
+import { EmptyFolder } from "./EmptyFolder";
+import { NoteListSkeleton } from "../../loader/NoteListSkeleton";
 
 export const Folder = () => {
   const theme = useTheme();
@@ -23,6 +25,10 @@ export const Folder = () => {
   const { isLoading: noteListLoading, data: noteList } = useGetNote({
     folderid: folderid,
   });
+
+  if (!folderid) {
+    return <EmptyFolder />;
+  }
 
   return (
     <Stack
@@ -39,37 +45,58 @@ export const Folder = () => {
         <Skeleton variant="text" width="45%" height={theme.spacing(4.5)} />
       ) : (
         <Typography variant="h2">
-          {noteList?.[0]?.folder_name || "No folder"}
+          {noteList?.[0]?.folder_name || "No folder selected"}
         </Typography>
       )}
-      <Stack spacing={theme.spacing(3.6)} zIndex={1}>
-        {noteList &&
-          noteList.map((note) => {
-            return (
-              <StyledStack
-                spacing={theme.spacing(1.5)}
-                key={note.id}
-                onClick={() => navigate(`folders/${folderid}/notes/${note.id}`)}
-                sx={{
-                  bgcolor:
-                    note.id === noteid
-                      ? theme.palette.primary.light
-                      : theme.palette.primary.main,
-                }}
-              >
-                <Typography variant="h3">{note.name}</Typography>
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography variant="h4" color={theme.palette.text.secondary}>
-                    {note.formatted_date}
-                  </Typography>
-                  <Typography variant="h4" color={theme.palette.text.secondary}>
-                    {note.preview_content}
-                  </Typography>
-                </Stack>
-              </StyledStack>
-            );
-          })}
-      </Stack>
+
+      {noteListLoading ? (
+        <NoteListSkeleton />
+      ) : (
+        <Stack
+          spacing={theme.spacing(3.6)}
+          zIndex={1}
+          sx={{
+            overflowY: "auto",
+            scrollbarWidth: "none",
+          }}
+        >
+          {noteList &&
+            noteList.map((note) => {
+              return (
+                <StyledStack
+                  spacing={theme.spacing(1.5)}
+                  key={note.id}
+                  onClick={() =>
+                    navigate(`folders/${folderid}/notes/${note.id}`)
+                  }
+                  sx={{
+                    bgcolor:
+                      note.id === noteid
+                        ? theme.palette.primary.light
+                        : theme.palette.primary.main,
+                  }}
+                >
+                  <Typography variant="h3">{note.name}</Typography>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography
+                      variant="h4"
+                      color={theme.palette.text.secondary}
+                    >
+                      {note.formatted_date}
+                    </Typography>
+                    <Typography
+                      variant="h4"
+                      color={theme.palette.text.secondary}
+                    >
+                      {note.preview_content}
+                    </Typography>
+                  </Stack>
+                </StyledStack>
+              );
+            })}
+        </Stack>
+      )}
+
       {theme.palette.customTheme === "midnight" && (
         <Box
           position="absolute"

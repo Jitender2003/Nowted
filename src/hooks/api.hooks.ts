@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import type {
   RecentNotesResponseData,
@@ -14,10 +14,41 @@ type GetNotesParams = {
   searchstring?: string;
 };
 
+type PatchNoteParams = {
+  name?: string;
+  content?: string;
+  isFavorite?: string;
+  isArchived?: string;
+};
+
+type CreateNoteParams = {
+  folderid: string;
+  name: string;
+  content: string;
+};
+
 const publicAxios = axios.create({
   baseURL: "http://localhost:3000",
   headers: { "Content-Type": "application/json" },
 });
+
+// create new note
+export const useCreateNewNote = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: CreateNoteParams) => {
+      const response = await publicAxios.post("/notes", params);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["recentnotes"] });
+    },
+    onError: (error) => {
+      console.error("Failed to create note:", error.message);
+    },
+  });
+};
 
 // get recent notes
 export const useGetRecentNotes = () => {
@@ -46,7 +77,7 @@ export const useGetFolders = () => {
   });
 };
 
-// get notes =
+// get notes
 export const useGetNote = (params: GetNotesParams) => {
   return useQuery<NoteListResponseData[]>({
     queryKey: ["notes", params],
@@ -70,5 +101,23 @@ export const useGetNoteById = (noteid?: string) => {
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
     enabled: !!noteid,
+  });
+};
+
+// patch note content
+export const usePatchNote = (id?: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: PatchNoteParams) => {
+      const response = await publicAxios.patch(`notes/${id}`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["recentnotes"] });
+    },
+    onError: (error) => {
+      console.error("Failed to create note:", error.message);
+    },
   });
 };
