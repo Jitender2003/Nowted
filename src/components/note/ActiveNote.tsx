@@ -30,12 +30,9 @@ import { useDebounceCallback } from "../../hooks/Debounce";
 
 export const ActiveNote = () => {
   const theme = useTheme();
-  const { noteid, folderid, favorite, archived, deleted } = useParams<{
+  const { noteid, folderid } = useParams<{
     noteid: string;
     folderid: string;
-    favorite: string;
-    archived: string;
-    deleted: string;
   }>();
   const [noteContent, setNoteContent] = useState<string>("");
   const [noteHeader, setNoteHeader] = useState<string>("");
@@ -47,6 +44,9 @@ export const ActiveNote = () => {
   const { isLoading: noteLoading, data: note } = useGetNoteById(noteid);
   const { mutate: patchNote } = usePatchNote(noteid);
   const { mutate: deleteNote } = useDeleteNote();
+
+  const isFavoriteRoute = location.pathname.includes("/favorite");
+  const isArchivedRoute = location.pathname.includes("/archived");
 
   const handleNoteOptions = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -60,9 +60,9 @@ export const ActiveNote = () => {
       { isFavorite: !isFavorite },
       {
         onSuccess: () => {
-          if (favorite) {
+          if (isFavoriteRoute) {
             navigate(`/Nowted/favorite`);
-          } else if (archived) {
+          } else if (isArchivedRoute) {
             navigate(`/Nowted/archived`);
           }
         },
@@ -76,9 +76,9 @@ export const ActiveNote = () => {
       { isArchived: !isArchive },
       {
         onSuccess: () => {
-          if (favorite) {
+          if (isFavoriteRoute) {
             navigate(`/Nowted/favorite`);
-          } else if (archived) {
+          } else if (isArchivedRoute) {
             navigate(`/Nowted/archived`);
           } else {
             navigate(`/Nowted/folders/${folderid}`);
@@ -96,9 +96,9 @@ export const ActiveNote = () => {
         { id: noteid },
         {
           onSuccess: () => {
-            if (favorite) {
+            if (isFavoriteRoute) {
               navigate(`/Nowted/favorite`);
-            } else if (archived) {
+            } else if (isArchivedRoute) {
               navigate(`/Nowted/archived`);
             } else {
               navigate(`/Nowted/folders/${folderid}`);
@@ -151,7 +151,7 @@ export const ActiveNote = () => {
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         {noteLoading ? (
-          <Skeleton variant="text" width={1500} height={theme.spacing(5)} />
+          <Skeleton variant="text" width={200} height={theme.spacing(5)} />
         ) : (
           <>
             <TextField

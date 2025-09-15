@@ -8,10 +8,10 @@ import {
   type Theme,
 } from "@mui/material";
 import { BackgroundBeams } from "../ui/background-beams";
-// import { useNavigate } from "react-router-dom";
+
 import { useGetNote, type GetNotesParams } from "../../hooks/api.hooks";
 import { useNavigate, useParams } from "react-router-dom";
-import { EmptyFolder } from "./EmptyFolder";
+
 import { NoteListSkeleton } from "../../loader/NoteListSkeleton";
 
 export const Folder = () => {
@@ -22,25 +22,28 @@ export const Folder = () => {
     noteid: string;
   }>();
   const params: GetNotesParams = {};
+  let isMoreOptRoute = false;
+  let folderTitle = "";
 
   if (folderid) {
     params.folderid = folderid;
     params.archived = false;
     params.deleted = false;
   } else if (location.pathname.includes("favorite")) {
+    isMoreOptRoute = true;
+    folderTitle = "Favorite";
     params.favorite = true;
   } else if (location.pathname.includes("archived")) {
+    isMoreOptRoute = true;
+    folderTitle = "Archived";
     params.archived = true;
-  } else if (location.pathname.includes("deleted")) {
+  } else if (location.pathname.includes("trash")) {
+    isMoreOptRoute = true;
+    folderTitle = "Trash";
     params.deleted = true;
   }
 
   const { isLoading: noteListLoading, data: noteList } = useGetNote(params);
-  console.log("folderdata", noteList);
-
-  if (!folderid) {
-    return <EmptyFolder />;
-  }
 
   return (
     <Stack
@@ -57,7 +60,9 @@ export const Folder = () => {
         <Skeleton variant="text" width="45%" height={theme.spacing(4.5)} />
       ) : (
         <Typography variant="h2">
-          {noteList?.[0]?.folder_name || "Create a note to view"}
+          {isMoreOptRoute
+            ? folderTitle
+            : noteList?.[0]?.folder_name || "Create a note to view"}
         </Typography>
       )}
 
@@ -78,9 +83,7 @@ export const Folder = () => {
                 <StyledStack
                   spacing={theme.spacing(1.5)}
                   key={note.id}
-                  onClick={() =>
-                    navigate(`folders/${folderid}/notes/${note.id}`)
-                  }
+                  onClick={() => navigate(`notes/${note.id}`)}
                   sx={{
                     bgcolor:
                       note.id === noteid

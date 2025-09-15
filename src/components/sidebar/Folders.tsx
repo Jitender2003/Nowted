@@ -16,6 +16,7 @@ export const Folders = () => {
   const navigate = useNavigate();
   const { isLoading: folderListLoading, data: folderList } = useGetFolders();
   const { folderid } = useParams<{ folderid: string }>();
+
   const [isCreatNewFolder, setIsCreateNewFolder] = useState<boolean>(false);
   const [foldertitle, setFolderTitle] = useState<string>("");
   const [editFolderId, setEditFolderId] = useState<string>("");
@@ -23,6 +24,10 @@ export const Folders = () => {
 
   const { mutate: createNewFolder } = useCreateNewFolder();
   const { mutate: updateFolder } = usePatchFolder();
+
+  const isFavoriteRoute = location.pathname.includes("/favorite");
+  const isTrashRoute = location.pathname.includes("/trash");
+  const isArchivedRoute = location.pathname.includes("/archived");
 
   const handleCreateNewFolder = () => {
     setIsCreateNewFolder(!isCreatNewFolder);
@@ -47,6 +52,7 @@ export const Folders = () => {
   };
 
   useEffect(() => {
+    if (isArchivedRoute || isFavoriteRoute || isTrashRoute) return;
     if (
       !folderListLoading &&
       folderList &&
@@ -55,7 +61,15 @@ export const Folders = () => {
     ) {
       navigate(`folders/${folderList[0].id}`, { replace: true });
     }
-  }, [folderListLoading, folderList, folderid, navigate]);
+  }, [
+    folderListLoading,
+    folderList,
+    folderid,
+    navigate,
+    isArchivedRoute,
+    isTrashRoute,
+    isFavoriteRoute,
+  ]);
 
   const handleFolderTitleEdit = (folderid: string, foldername: string) => {
     setEditFolderId(folderid);
