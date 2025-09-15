@@ -25,6 +25,7 @@ export const Folder = () => {
   const { isLoading: noteListLoading, data: noteList } = useGetNote({
     folderid: folderid,
   });
+  console.log("folderdata", noteList);
 
   if (!folderid) {
     return <EmptyFolder />;
@@ -45,7 +46,7 @@ export const Folder = () => {
         <Skeleton variant="text" width="45%" height={theme.spacing(4.5)} />
       ) : (
         <Typography variant="h2">
-          {noteList?.[0]?.folder_name || "No folder selected"}
+          {noteList?.[0]?.folder_name || "Create a note to view"}
         </Typography>
       )}
 

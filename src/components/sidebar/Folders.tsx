@@ -1,17 +1,43 @@
-import { Box, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Stack, TextField, Typography, useTheme } from "@mui/material";
 import { addFolderIcon, folderIcon } from "../../assets";
 import { StyledIconButton } from "../../uiComponents/StyledIconButton";
 import { StyledStack } from "../../uiComponents/StyledStack";
-import { useGetFolders } from "../../hooks/api.hooks";
+import { useCreateNewFolder, useGetFolders } from "../../hooks/api.hooks";
 import { useNavigate, useParams } from "react-router-dom";
 import { NoteSkeleton } from "../../loader/Skeletonnote&folderloader";
-import { useEffect } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 
 export const Folders = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { isLoading: folderListLoading, data: folderList } = useGetFolders();
   const { folderid } = useParams<{ folderid: string }>();
+  const [isCreatNewFolder, setIsCreateNewFolder] = useState<boolean>(false);
+  const [foldertitle, setFolderTitle] = useState<string>("");
+
+  const { mutate: createNewFolder } = useCreateNewFolder();
+
+  const handleCreateNewFolder = () => {
+    setIsCreateNewFolder(!isCreatNewFolder);
+  };
+
+  const handleFoldertitleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFolderTitle(e.target.value);
+  };
+
+  const handleSaveNewFolder = () => {
+    createNewFolder(
+      { name: foldertitle },
+      {
+        onSuccess: (data) => {
+          navigate(`folders/${data.folder.id}`);
+          handleCreateNewFolder();
+        },
+      }
+    );
+  };
 
   useEffect(() => {
     if (
@@ -27,15 +53,42 @@ export const Folders = () => {
   return (
     <Stack spacing={theme.spacing(1)} width="100%">
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Typography variant="h5" color={theme.palette.text.secondary}>
-          Folders
-        </Typography>
+        {isCreatNewFolder ? (
+          <TextField
+            autoFocus
+            variant="standard"
+            value={foldertitle}
+            placeholder="Hit enter to save"
+            onChange={(e) => handleFoldertitleChange(e)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSaveNewFolder();
+              }
+            }}
+            inputProps={{
+              sx: {
+                "&::placeholder": {
+                  fontStyle: "italic",
+                  opacity: 0.5,
+                },
+              },
+            }}
+            fullWidth
+          />
+        ) : (
+          <Typography variant="h5" color={theme.palette.text.secondary}>
+            Folders
+          </Typography>
+        )}
+
         <StyledIconButton>
           <Box
             component="img"
             width={theme.spacing(2.5)}
             height={theme.spacing(2.5)}
             src={addFolderIcon}
+            onClick={handleCreateNewFolder}
           />
         </StyledIconButton>
       </Stack>

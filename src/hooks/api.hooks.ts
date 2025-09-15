@@ -27,6 +27,10 @@ type CreateNoteParams = {
   content: string;
 };
 
+type CreateFolderParams = {
+  name: string;
+};
+
 const publicAxios = axios.create({
   baseURL: "http://localhost:3000",
   headers: { "Content-Type": "application/json" },
@@ -43,6 +47,24 @@ export const useCreateNewNote = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["recentnotes"] });
+    },
+    onError: (error) => {
+      console.error("Failed to create note:", error.message);
+    },
+  });
+};
+
+// create new folder
+export const useCreateNewFolder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (param: CreateFolderParams) => {
+      const response = await publicAxios.post("/folders", param);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
     },
     onError: (error) => {
       console.error("Failed to create note:", error.message);
