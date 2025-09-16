@@ -1,7 +1,12 @@
 import {
   Box,
   Button,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
   MenuItem,
+  Paper,
   Select,
   Stack,
   TextField,
@@ -17,18 +22,39 @@ import styled from "@emotion/styled";
 import type { Theme } from "@mui/material/styles";
 import { useThemeStore } from "../../stores/themeStore/ThemeStore";
 import { StyledIconButton } from "../../uiComponents/StyledIconButton";
-import { useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useCreateNewNote } from "../../hooks/api.hooks";
+import { useCreateNewNote, useGetNote } from "../../hooks/api.hooks";
 
 export const Sidebar = () => {
   const theme = useTheme();
 
   const [isSearch, setIsSearch] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const { folderid } = useParams<{ folderid: string }>();
+  const [searchText, setSearchText] = useState<string>("");
+  const { noteid } = useParams<{ noteid: string }>();
 
   const appTheme = useThemeStore((state) => state.theme);
   const updateThemeChange = useThemeStore((state) => state.setTheme);
+
+  const {
+    data: noteData,
+    isLoading: noteDataLoading,
+    refetch,
+  } = useGetNote({
+    searchstring: searchText,
+    archived: false,
+    deleted: false,
+    enabled: false,
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchText) refetch();
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchText, refetch]);
 
   const { mutate: createNote } = useCreateNewNote();
   const navigate = useNavigate();
@@ -58,6 +84,37 @@ export const Sidebar = () => {
     );
   };
 
+  const handleSearchNote = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setSearchText(e.target.value);
+  };
+
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (searchText && noteData && noteData.length > 0) {
+      setShowResults(true);
+    } else {
+      setShowResults(false);
+    }
+  }, [noteData, searchText]);
+
+  console.log("notedata", noteData);
   return (
     <Stack
       width="20vw"
@@ -93,9 +150,75 @@ export const Sidebar = () => {
         </StyledIconButton>
       </Stack>
 
-      <Stack spacing={theme.spacing(1.5)}>
+      <Stack spacing={theme.spacing(1.5)} position="relative">
         {isSearch ? (
-          <StyledSearch placeholder="Search" />
+          <Stack
+            spacing={theme.spacing(1.5)}
+            position="relative"
+            ref={searchRef}
+          >
+            <StyledSearch
+              placeholder="Search"
+              value={searchText}
+              onChange={(e) => {
+                handleSearchNote(e);
+              }}
+            />
+            {showResults && noteData && noteData.length > 0 && (
+              <StyledNoteResult>
+                <List>
+                  {noteData.map((note) => (
+                    <ListItem
+                      key={note.id}
+                      disablePadding
+                      sx={{
+                        borderRadius: theme.spacing(1),
+                        fontWeight: 500,
+                        padding: 0,
+                        paddingY: 0,
+                        paddingX: 0,
+                        color: theme.palette.text.primary,
+                        transition: "all 0.3s ease",
+                        backgroundColor:
+                          note.id === noteid
+                            ? "rgba(255, 255, 255, 0.12)"
+                            : "transparent",
+
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 0.12)",
+                          transform: "scale(1.02)",
+                        },
+                        "&.Mui-selected": {
+                          backgroundColor: "rgba(255, 255, 255, 0.12)",
+                        },
+                        "&.Mui-focusVisible": {
+                          backgroundColor: "none",
+                          outline: "none",
+                        },
+                        "&:not(:last-child)": {
+                          marginBottom: theme.spacing(1),
+                        },
+                        ".MuiButtonBase-root": {
+                          paddingX: theme.spacing(1),
+                          paddingY: theme.spacing(0.5),
+                        },
+                      }}
+                    >
+                      <ListItemButton
+                        onClick={() => {
+                          navigate(
+                            `folders/${note.folder_id}/notes/${note.id}`
+                          );
+                        }}
+                      >
+                        <ListItemText primary={note.name} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </List>
+              </StyledNoteResult>
+            )}
+          </Stack>
         ) : (
           <StyledFilledButton
             startIcon={
@@ -262,4 +385,23 @@ const StyledFilledButton = styled(Button)<{ theme?: Theme }>(({ theme }) => ({
   "&:hover": {
     backgroundColor: theme.palette.primary.light,
   },
+}));
+
+const StyledNoteResult = styled(Paper)<{ theme?: Theme }>(({ theme }) => ({
+  position: "absolute",
+  maxHeight: theme.spacing(27),
+  overflowY: "auto",
+  top: theme.spacing(4),
+  left: 0,
+  right: 0,
+  backgroundColor: "rgba(255, 255, 255, 0.06)",
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
+  border: "1px solid rgba(255, 255, 255, 0.15)",
+  borderRadius: theme.spacing(1.5),
+  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
+  overflow: "auto",
+  zIndex: 1200,
+  scrollbarWidth: "none",
+  padding: theme.spacing(1),
 }));

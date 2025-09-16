@@ -29,7 +29,7 @@ export interface RecentNotesResponseData {
   recentNotes: NoteData[];
 }
 
-export interface NoteListResponseData {
+export interface Note {
   id: string;
   name: string;
   preview_content: string;
@@ -37,6 +37,8 @@ export interface NoteListResponseData {
   folder_name: string;
   folder_id: string;
 }
+
+export type NoteListResponseData = Note[];
 
 export interface CreateNoteResoponseData {
   message: string;

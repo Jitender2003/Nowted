@@ -10,6 +10,7 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import { NoteSkeleton } from "../../loader/Skeletonnote&folderloader";
 import { useEffect, useState, type ChangeEvent } from "react";
+import { generateUniqueFolderName } from "../../hooks/GenerateUniqueFolderName";
 
 export const Folders = () => {
   const theme = useTheme();
@@ -40,8 +41,13 @@ export const Folders = () => {
   };
 
   const handleSaveNewFolder = () => {
+    if (!folderList) return;
+
+    const existingNames = folderList.map((f) => f.name);
+    const safeName = generateUniqueFolderName(foldertitle, existingNames);
+
     createNewFolder(
-      { name: foldertitle },
+      { name: safeName },
       {
         onSuccess: (data) => {
           navigate(`folders/${data.folder.id}`);
@@ -77,7 +83,15 @@ export const Folders = () => {
   };
 
   const handleSaveFolder = (folderid: string, foldername: string) => {
-    updateFolder({ name: foldername, id: folderid });
+    if (!folderList) return;
+
+    const existingNames = folderList
+      .filter((f) => f.id !== folderid) // exclude current folder
+      .map((f) => f.name);
+
+    const safeName = generateUniqueFolderName(foldername, existingNames);
+
+    updateFolder({ name: safeName, id: folderid });
     setEditFolderId("");
   };
 
@@ -172,7 +186,6 @@ export const Folders = () => {
                   variant="standard"
                   InputProps={{
                     disableUnderline: true,
-
                     style: {
                       ...theme.typography.h6,
                       padding: 0,

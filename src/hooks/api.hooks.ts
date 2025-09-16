@@ -12,6 +12,7 @@ export type GetNotesParams = {
   favorite?: boolean;
   deleted?: boolean;
   searchstring?: string;
+   enabled?: boolean;
 };
 
 type PatchNoteParams = {
@@ -114,7 +115,7 @@ export const useGetFolders = () => {
 
 // get notes
 export const useGetNote = (params: GetNotesParams) => {
-  return useQuery<NoteListResponseData[]>({
+  return useQuery<NoteListResponseData>({
     queryKey: ["notes", params],
     queryFn: async () => {
       const response = await publicAxios.get("/notes", { params });
@@ -122,6 +123,7 @@ export const useGetNote = (params: GetNotesParams) => {
     },
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
+    enabled: params?.enabled !== false,
   });
 };
 
