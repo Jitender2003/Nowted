@@ -11,3 +11,4 @@ export { default as calenderIcon } from "./Frame.svg";
 export { default as noteOptionIcon } from "./note-option.svg";
 export { default as EmptyNoteIcon } from "./EmptyNote.svg";
 export { default as favoriteFillIcon } from "./favorite-fill.svg";
+export { default as restoreIcon } from "./restore.svg";

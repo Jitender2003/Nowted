@@ -40,6 +40,10 @@ type DeleteNoteParams = {
   id?: string;
 };
 
+type RestoreNoteParams = {
+  id?: string;
+};
+
 const publicAxios = axios.create({
   baseURL: "http://localhost:3000",
   headers: { "Content-Type": "application/json" },
@@ -179,6 +183,22 @@ export const useDeleteNote = () => {
   return useMutation({
     mutationFn: async (data: DeleteNoteParams) => {
       const response = await publicAxios.delete(`/notes/${data.id}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["recentnotes"] });
+    },
+  });
+};
+
+// Restore note
+
+export const useRestoreNote = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: RestoreNoteParams) => {
+      const response = await publicAxios.post(`/notes/${data.id}/restore`);
       return response.data;
     },
     onSuccess: () => {

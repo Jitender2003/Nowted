@@ -85,6 +85,7 @@ export const Folder = () => {
                   key={note.id}
                   onClick={() => navigate(`notes/${note.id}`)}
                   sx={{
+                    cursor: "pointer",
                     bgcolor:
                       note.id === noteid
                         ? theme.palette.primary.light
@@ -133,11 +134,17 @@ export const Folder = () => {
   );
 };
 
-const StyledStack = styled(Stack)<{ theme?: Theme }>(({ theme }) => ({
-  padding: theme.spacing(2.5),
-  borderRadius: theme.spacing(1),
-
-  "&:hover": {
-    backgroundColor: theme.palette.primary.light,
-  },
-}));
+const StyledStack = styled(Stack)<{ theme?: Theme; disableHover?: boolean }>(
+  ({ theme, disableHover }) => ({
+    padding: theme.spacing(2.5),
+    borderRadius: theme.spacing(1),
+    ...(disableHover
+      ? {}
+      : {
+          "&:hover": {
+            backgroundColor: theme.palette.primary.light,
+            cursor: "pointer",
+          },
+        }),
+  })
+);

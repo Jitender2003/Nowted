@@ -107,6 +107,18 @@ export const Sidebar = () => {
               />
             }
             onClick={handleCreateNewNote}
+            disabled={
+              location.pathname.includes("trash") ||
+              location.pathname.includes("archived") ||
+              location.pathname.includes("favorite")
+            }
+            sx={{
+              "&.Mui-disabled": {
+                bgcolor: theme.palette.primary.main,
+                opacity: 0.5,
+                color: theme.palette.common.white,
+              },
+            }}
           >
             <Typography variant="h6">New Note</Typography>
           </StyledFilledButton>

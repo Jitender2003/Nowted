@@ -6,6 +6,9 @@ import { useNavigate } from "react-router-dom";
 export const More = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const isFavoriteRoute = location.pathname.includes("/favorite");
+  const isTrashRoute = location.pathname.includes("/trash");
+  const isArchivedRoute = location.pathname.includes("/archived");
   return (
     <Stack spacing={theme.spacing(1)} width="100%">
       <Typography variant="h5" color={theme.palette.text.secondary}>
@@ -18,6 +21,9 @@ export const More = () => {
           onClick={() => {
             navigate(`/Nowted/favorite`);
           }}
+          bgcolor={
+            isFavoriteRoute ? theme.palette.primary.light : "transparent"
+          }
         >
           <Box
             component="img"
@@ -35,6 +41,7 @@ export const More = () => {
           onClick={() => {
             navigate(`/Nowted/trash`);
           }}
+          bgcolor={isTrashRoute ? theme.palette.primary.light : "transparent"}
         >
           <Box
             component="img"
@@ -52,6 +59,9 @@ export const More = () => {
           onClick={() => {
             navigate(`/Nowted/archived`);
           }}
+          bgcolor={
+            isArchivedRoute ? theme.palette.primary.light : "transparent"
+          }
         >
           <Box
             component="img"

@@ -138,7 +138,6 @@ export const ActiveNote = () => {
     setNoteHeader(e.target.value);
     debouncePatchNotetitle(e.target.value);
   };
-  console.log(note);
 
   return (
     <Stack
