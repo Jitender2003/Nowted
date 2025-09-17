@@ -38,11 +38,7 @@ export const Sidebar = () => {
   const appTheme = useThemeStore((state) => state.theme);
   const updateThemeChange = useThemeStore((state) => state.setTheme);
 
-  const {
-    data: noteData,
-    isLoading: noteDataLoading,
-    refetch,
-  } = useGetNote({
+  const { data: noteData, refetch } = useGetNote({
     searchstring: searchText,
     archived: false,
     deleted: false,
