@@ -12,7 +12,7 @@ export type GetNotesParams = {
   favorite?: boolean;
   deleted?: boolean;
   searchstring?: string;
-   enabled?: boolean;
+  enabled?: boolean;
 };
 
 type PatchNoteParams = {
@@ -45,80 +45,43 @@ type RestoreNoteParams = {
   id?: string;
 };
 
-const publicAxios = axios.create({
+// Public Axios for signup/login
+export const publicAxios = axios.create({
   baseURL: "http://localhost:3000",
   headers: { "Content-Type": "application/json" },
 });
 
-// create new note
+// Private Axios for authenticated requests
+export const privateAxios = axios.create({
+  baseURL: "http://localhost:3000",
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true, // important for JWT cookies
+});
+
+// -------------------- Notes --------------------
+
+// Create new note
 export const useCreateNewNote = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (params: CreateNoteParams) => {
-      const response = await publicAxios.post("/notes", params);
+      const response = await privateAxios.post("/notes", params);
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["recentnotes"] });
     },
-    onError: (error) => {
-      console.error("Failed to create note:", error.message);
-    },
+    onError: (error) => console.error("Failed to create note:", error),
   });
 };
 
-// create new folder
-export const useCreateNewFolder = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (param: CreateFolderParams) => {
-      const response = await publicAxios.post("/folders", param);
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["folders"] });
-    },
-    onError: (error) => {
-      console.error("Failed to create note:", error.message);
-    },
-  });
-};
-
-// get recent notes
-export const useGetRecentNotes = () => {
-  return useQuery<RecentNotesResponseData>({
-    queryKey: ["recentnotes"],
-    queryFn: async () => {
-      const response = await publicAxios.get("/notes/recent");
-      return response.data;
-    },
-
-    staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
-  });
-};
-
-//get folder list
-export const useGetFolders = () => {
-  return useQuery<FoldersResponseData>({
-    queryKey: ["folders"],
-    queryFn: async () => {
-      const response = await publicAxios.get("/folders");
-      return response.data;
-    },
-    staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
-  });
-};
-
-// get notes
+// Get notes
 export const useGetNote = (params: GetNotesParams) => {
   return useQuery<NoteListResponseData>({
     queryKey: ["notes", params],
     queryFn: async () => {
-      const response = await publicAxios.get("/notes", { params });
+      const response = await privateAxios.get("/notes", { params });
       return response.data;
     },
     staleTime: 1000 * 60 * 5,
@@ -127,12 +90,12 @@ export const useGetNote = (params: GetNotesParams) => {
   });
 };
 
-// get note by id
+// Get note by id
 export const useGetNoteById = (noteid?: string) => {
   return useQuery({
     queryKey: ["notes", noteid],
     queryFn: async () => {
-      const response = await publicAxios.get(`/notes/${noteid}`);
+      const response = await privateAxios.get(`/notes/${noteid}`);
       return response.data;
     },
     staleTime: 1000 * 60 * 5,
@@ -141,50 +104,28 @@ export const useGetNoteById = (noteid?: string) => {
   });
 };
 
-// patch note content
+// Patch note
 export const usePatchNote = (id?: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: PatchNoteParams) => {
-      const response = await publicAxios.patch(`notes/${id}`, data);
+      const response = await privateAxios.patch(`/notes/${id}`, data);
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["recentnotes"] });
     },
-    onError: (error) => {
-      console.error("Failed to create note:", error.message);
-    },
+    onError: (error) => console.error("Failed to update note:", error),
   });
 };
 
-// patch folder content
-export const usePatchFolder = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: PatchFolderParams) => {
-      const response = await publicAxios.patch(`/folders/${data.id}`, {
-        name: data.name,
-      });
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["folders"] });
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-    },
-  });
-};
-
-// delete note
-
+// Delete note
 export const useDeleteNote = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: DeleteNoteParams) => {
-      const response = await publicAxios.delete(`/notes/${data.id}`);
+      const response = await privateAxios.delete(`/notes/${data.id}`);
       return response.data;
     },
     onSuccess: () => {
@@ -195,17 +136,77 @@ export const useDeleteNote = () => {
 };
 
 // Restore note
-
 export const useRestoreNote = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: RestoreNoteParams) => {
-      const response = await publicAxios.post(`/notes/${data.id}/restore`);
+      const response = await privateAxios.post(`/notes/${data.id}/restore`);
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["recentnotes"] });
     },
+  });
+};
+
+// Get recent notes
+export const useGetRecentNotes = () => {
+  return useQuery<RecentNotesResponseData>({
+    queryKey: ["recentnotes"],
+    queryFn: async () => {
+      const response = await privateAxios.get("/notes/recent");
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
+};
+
+// -------------------- Folders --------------------
+
+// Create new folder
+export const useCreateNewFolder = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (param: CreateFolderParams) => {
+      const response = await privateAxios.post("/folders", param);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
+    },
+    onError: (error) => console.error("Failed to create folder:", error),
+  });
+};
+
+// Get folders
+export const useGetFolders = () => {
+  return useQuery<FoldersResponseData>({
+    queryKey: ["folders"],
+    queryFn: async () => {
+      const response = await privateAxios.get("/folders");
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
+};
+
+// Patch folder
+export const usePatchFolder = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: PatchFolderParams) => {
+      const response = await privateAxios.patch(`/folders/${data.id}`, {
+        name: data.name,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+    onError: (error) => console.error("Failed to update folder:", error),
   });
 };

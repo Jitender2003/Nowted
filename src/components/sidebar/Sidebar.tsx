@@ -74,7 +74,7 @@ export const Sidebar = () => {
       },
       {
         onSuccess: (data) => {
-          navigate(`folders/${folderid}/notes/${data.noteid}`);
+          navigate(`folders/${folderid}/notes/${data.noteId}`);
         },
       }
     );
@@ -110,7 +110,6 @@ export const Sidebar = () => {
     }
   }, [noteData, searchText]);
 
-  console.log("notedata", noteData);
   return (
     <Stack
       width="20vw"
