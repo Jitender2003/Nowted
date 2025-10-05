@@ -28,7 +28,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={selectedTheme}>
         <CssBaseline />
-        <Layout />
+        <Layout  />
       </ThemeProvider>
     </QueryClientProvider>
   );

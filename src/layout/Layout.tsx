@@ -1,4 +1,4 @@
-import { Stack } from "@mui/material";
+import { Stack, useTheme } from "@mui/material";
 import { Folder } from "../components/folder/Folder";
 import { Note } from "../components/note/Note";
 import { Sidebar } from "../components/sidebar/Sidebar";
@@ -9,17 +9,27 @@ import {
   Outlet,
   Navigate,
 } from "react-router-dom";
-import { AuthProvider, useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { Login } from "../components/login-signup/Login";
 import { Signup } from "../components/login-signup/Signup";
+import { AuthProvider } from "../context/AuthProvider";
 
 // Layout components
-const AppLayout = () => (
-  <Stack direction="row" margin="0px" padding="0px">
-    <Sidebar />
-    <Outlet />
-  </Stack>
-);
+const AppLayout = () => {
+  const theme = useTheme();
+
+  return (
+    <Stack
+      direction="row"
+      margin="0px"
+      padding="0px"
+      bgcolor={theme.palette.primary.main}
+    >
+      <Sidebar />
+      <Outlet />
+    </Stack>
+  );
+};
 
 const FolderAndNote = () => (
   <Stack direction="row" margin="0px" padding="0px" flex={1}>
