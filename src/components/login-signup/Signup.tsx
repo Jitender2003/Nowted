@@ -1,63 +1,189 @@
-// src/pages/Signup.tsx
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Box, Stack, Typography, useTheme, alpha, Button } from "@mui/material";
+import { BackgroundBeams } from "../ui/background-beams";
+import { logo } from "../../assets";
+import { StyledInput } from "./components/StyledTextField";
+import { useForm } from "react-hook-form";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const signupSchema = z.object({
+  username: z.string().min(3),
+  email: z
+    .string()
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, { message: "Invalid email address" }),
+  password: z.string().min(6),
+});
+
+type FormFields = z.infer<typeof signupSchema>;
 
 export const Signup = () => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const theme = useTheme();
   const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+  } = useForm<FormFields>({
+    resolver: zodResolver(signupSchema),
+  });
 
-  const handleSignup = async () => {
+  const handleSignup = async (data: FormFields) => {
     try {
-      setError(null); // reset previous error
-
       await axios.post(
         "http://localhost:3000/auth/signup",
-        { username, email, password },
+        { username: data.username, email: data.email, password: data.password },
         { withCredentials: true }
       );
 
       navigate("/Nowted/login");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       if (err.response?.data?.message) {
-        setError(err.response.data.message);
+        setError("root", { message: err.response.data.message });
       } else {
-        setError("Signup failed. Please try again.");
+        setError("root", { message: "Signup failed. Please try again." });
       }
     }
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "auto", padding: "2rem" }}>
-      <h2>Signup</h2>
-      <input
-        type="text"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        placeholder="Username"
-        style={{ display: "block", marginBottom: "1rem", width: "100%" }}
-      />
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-        style={{ display: "block", marginBottom: "1rem", width: "100%" }}
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-        style={{ display: "block", marginBottom: "1rem", width: "100%" }}
-      />
-      <button onClick={handleSignup} style={{ width: "100%" }}>
-        Signup
-      </button>
-      {error && <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>}
-    </div>
+    <Stack
+      direction="row"
+      sx={{
+        width: "100vw",
+        height: "100vh",
+        padding: theme.spacing(1),
+        bgcolor: theme.palette.primary.dark,
+      }}
+    >
+      <Stack
+        sx={{
+          width: { xs: "0%", md: "50%" },
+          position: "relative",
+          overflow: "hidden",
+          borderRadius: theme.spacing(2),
+          background: `linear-gradient(to bottom, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            padding: 0,
+            margin: 0,
+            zIndex: 0,
+            height: "100%",
+            width: "100%",
+          }}
+        >
+          <BackgroundBeams />
+        </Box>
+
+        <Box
+          sx={{
+            position: "absolute",
+            zIndex: 1,
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            textAlign: "center",
+            color: "white",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: theme.spacing(1),
+            width: "50%",
+            height: "50%",
+          }}
+        >
+          <Box component="img" src={logo} width={150}></Box>
+          <Typography variant="body1" textAlign="justify">
+            Sign up to create, manage, and access your notes seamlessly. Your
+            workspace, your way — all in one place.
+          </Typography>
+        </Box>
+      </Stack>
+
+      <Stack
+        alignItems="center"
+        justifyContent="center"
+        width="50%"
+        spacing={1.5}
+      >
+        <Typography variant="h1">Sign Up</Typography>
+        <Typography variant="h5">
+          Enter your personal data to create an account
+        </Typography>
+        <Stack width="100%" maxWidth={400}>
+          <form onSubmit={handleSubmit(handleSignup)}>
+            <Stack spacing={3}>
+              <StyledInput
+                {...register("username")}
+                label="Username"
+                variant="outlined"
+                fullWidth
+                error={!!errors.username}
+                helperText={errors?.username?.message}
+              />
+              <StyledInput
+                {...register("email")}
+                label="Email"
+                variant="outlined"
+                fullWidth
+                error={!!errors.email}
+                helperText={errors?.email?.message}
+              />
+              <StyledInput
+                {...register("password")}
+                label="Password"
+                type="password"
+                variant="outlined"
+                fullWidth
+                error={!!errors.password}
+                helperText={errors?.password?.message}
+              />
+
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                size="large"
+                disabled={isSubmitting}
+                sx={{
+                  backgroundColor: theme.palette.secondary.main,
+                  "&:hover": {
+                    backgroundColor: theme.palette.secondary.dark,
+                  },
+                }}
+              >
+                <Typography variant="h5"> Sign Up</Typography>
+              </Button>
+              {errors.root?.message && (
+                <Typography color="error">{errors.root.message}</Typography>
+              )}
+            </Stack>
+          </form>
+        </Stack>
+        <Typography
+          variant="h5"
+          sx={{ color: alpha(theme.palette.text.primary, 0.4) }}
+        >
+          Already have an account?{" "}
+          <Link
+            to="/Nowted/login"
+            style={{
+              color: theme.palette.text.primary,
+              textDecoration: "none",
+            }}
+          >
+            log in
+          </Link>
+        </Typography>
+      </Stack>
+    </Stack>
   );
 };

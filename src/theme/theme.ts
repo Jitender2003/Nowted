@@ -62,6 +62,12 @@ const baseTheme = createTheme({
       fontSize: "28px",
       letterSpacing: 0,
     },
+
+    body1: {
+      fontWeight: 400,
+      fontSize: "12px",
+      letterSpacing: 0,
+    },
   },
 
   components: {

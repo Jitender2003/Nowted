@@ -1,26 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
-import {
-  Box,
-  Stack,
-  Typography,
-  useTheme,
-  alpha,
-  Button,
-  TextField,
-  type Theme,
-  styled,
-} from "@mui/material";
+import { Box, Stack, Typography, useTheme, alpha, Button } from "@mui/material";
 import { BackgroundBeams } from "../ui/background-beams";
 import { logo } from "../../assets";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { StyledInput } from "./components/StyledTextField";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const loginSchema = z.object({
-  emailOrUsername: z.union([z.string().min(1), z.string().email()]),
+  emailOrUsername: z.union([z.string().min(3), z.string().email()]),
   password: z.string().min(6),
 });
 
@@ -94,6 +85,8 @@ export const Login = () => {
 
         <Box
           sx={{
+            width: "50%",
+            height: "50%",
             position: "absolute",
             zIndex: 1,
             top: "50%",
@@ -103,11 +96,14 @@ export const Login = () => {
             color: "white",
             display: "flex",
             flexDirection: "column",
-            gap: theme.spacing(1.5),
+            justifyContent: "center",
+            gap: theme.spacing(1),
           }}
         >
           <Box component="img" src={logo} width={150}></Box>
-          <Typography variant="h2">Yoo, Welcome back!</Typography>
+          <Typography variant="body1" textAlign="justify">
+            Yoo, great to see you again! Log in and get back to creating!
+          </Typography>
         </Box>
       </Stack>
 
@@ -179,45 +175,3 @@ export const Login = () => {
     </Stack>
   );
 };
-
-const StyledInput = styled(TextField)<{ theme?: Theme }>(({ theme }) => ({
-  height: theme.spacing(5),
-
-  "& .MuiOutlinedInput-root": {
-    height: "100%",
-    borderRadius: theme.spacing(1),
-    paddingRight: theme.spacing(1),
-
-    "& fieldset": {
-      borderColor: theme.palette.primary.light,
-    },
-    "&:hover fieldset": {
-      borderColor: theme.palette.primary.main,
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: theme.palette.primary.main,
-    },
-  },
-
-  "& input": {
-    fontWeight: 400,
-    fontSize: theme.spacing(2),
-    letterSpacing: 0,
-    color: theme.palette.text.secondary,
-    padding: theme.spacing(1),
-  },
-  "& .MuiFormHelperText-root": {
-    fontSize: theme.spacing(1.5),
-    color: theme.palette.error.main,
-    marginLeft: 1,
-  },
-  "& .MuiInputLabel-root": {
-    color: theme.palette.text.secondary,
-    fontSize: theme.spacing(1.75),
-    fontWeight: 400,
-  },
-  "& .MuiInputLabel-root.Mui-focused": {
-    color: theme.palette.text.secondary,
-    fontWeight: 500,
-  },
-}));
