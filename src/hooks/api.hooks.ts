@@ -58,8 +58,6 @@ export const privateAxios = axios.create({
   withCredentials: true, // important for JWT cookies
 });
 
-// -------------------- Notes --------------------
-
 // Create new note
 export const useCreateNewNote = () => {
   const queryClient = useQueryClient();

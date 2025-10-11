@@ -1,5 +1,4 @@
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { Box, Stack, Typography, useTheme, alpha, Button } from "@mui/material";
 import { BackgroundBeams } from "../ui/background-beams";
@@ -8,8 +7,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { StyledInput } from "./components/StyledTextField";
+import { useAuthApi } from "../../hooks/auth.api.hooks";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const loginSchema = z.object({
   emailOrUsername: z.union([z.string().min(3), z.string().email()]),
   password: z.string().min(6),
@@ -23,6 +22,7 @@ export const Login = () => {
   const theme = useTheme();
   const {
     register,
+
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
@@ -30,24 +30,40 @@ export const Login = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  const handleLogin = async (data: FormFields) => {
-    try {
-      await axios.post(
-        "http://localhost:3000/auth/login",
-        { usernameOrEmail: data.emailOrUsername, password: data.password },
-        { withCredentials: true } // important for JWT cookie
-      );
-
-      await checkAuth(); // refresh auth context
-      navigate("/Nowted"); // redirect after login
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      if (err.response?.data?.message) {
-        setError("root", { message: err.response.data.message });
-      } else {
-        setError("root", { message: "Login failed. Please try again." });
+  const loginMutation = useAuthApi.useLogin({
+    onSuccess: () => {
+      checkAuth();
+      navigate("/Nowted/");
+    },
+    onError: (error) => {
+      const data = error.response?.data;
+      if (!data) {
+        setError("root", { message: "Something went wrong" });
+        return;
       }
-    }
+
+      const errorType = data.errorType;
+      const fieldMap: Record<string, keyof FormFields> = {
+        usernameOrEmail: "emailOrUsername",
+        password: "password",
+      };
+
+      if (errorType === "VALIDATION ERROR") {
+        const field = fieldMap[data.error.field];
+        if (field) {
+          setError(field, { message: data.error.message });
+        }
+      } else if (data.error?.message) {
+        setError("root", { message: data.error.message });
+      }
+    },
+  });
+
+  const handleLogin = async (data: FormFields) => {
+    loginMutation.mutate({
+      usernameOrEmail: data.emailOrUsername,
+      password: data.password,
+    });
   };
 
   return (
@@ -64,7 +80,6 @@ export const Login = () => {
         sx={{
           width: { xs: "0%", md: "50%" },
           position: "relative",
-          overflow: "hidden",
           borderRadius: theme.spacing(2),
           background: `linear-gradient(to bottom, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
         }}
@@ -140,7 +155,7 @@ export const Login = () => {
                 variant="contained"
                 fullWidth
                 size="large"
-                disabled={isSubmitting}
+                disabled={loginMutation.isPending || isSubmitting}
                 sx={{
                   backgroundColor: theme.palette.secondary.main,
                   "&:hover": {

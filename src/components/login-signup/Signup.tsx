@@ -1,5 +1,4 @@
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { Box, Stack, Typography, useTheme, alpha, Button } from "@mui/material";
 import { BackgroundBeams } from "../ui/background-beams";
 import { logo } from "../../assets";
@@ -7,8 +6,8 @@ import { StyledInput } from "./components/StyledTextField";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuthApi } from "../../hooks/auth.api.hooks";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const signupSchema = z.object({
   username: z.string().min(3),
   email: z
@@ -31,23 +30,41 @@ export const Signup = () => {
     resolver: zodResolver(signupSchema),
   });
 
-  const handleSignup = async (data: FormFields) => {
-    try {
-      await axios.post(
-        "http://localhost:3000/auth/signup",
-        { username: data.username, email: data.email, password: data.password },
-        { withCredentials: true }
-      );
-
+  const signupMutation = useAuthApi.useSignup({
+    onSuccess: () => {
       navigate("/Nowted/login");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      if (err.response?.data?.message) {
-        setError("root", { message: err.response.data.message });
-      } else {
-        setError("root", { message: "Signup failed. Please try again." });
+    },
+    onError: (error) => {
+      const data = error.response?.data;
+      if (!data) {
+        setError("root", { message: "Something went wrong" });
+        return;
       }
-    }
+
+      const errorType = data.errorType;
+      const fieldMap: Record<string, keyof FormFields> = {
+        username: "username",
+        email: "email",
+        password: "password",
+      };
+
+      if (errorType === "VALIDATION ERROR") {
+        const field = fieldMap[data.error.field];
+        if (field) {
+          setError(field, { message: data.error.message });
+        }
+      } else if (data.error?.message) {
+        setError("root", { message: data.error.message });
+      }
+    },
+  });
+
+  const handleSignup = async (data: FormFields) => {
+    signupMutation.mutate({
+      username: data.username,
+      email: data.email,
+      password: data.password,
+    });
   };
 
   return (
