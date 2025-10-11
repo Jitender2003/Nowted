@@ -1,4 +1,11 @@
-import { Box, Stack, Typography, useTheme, type Theme } from "@mui/material";
+import {
+  alpha,
+  Box,
+  Stack,
+  Typography,
+  useTheme,
+  type Theme,
+} from "@mui/material";
 import { file } from "../../assets";
 import styled from "@emotion/styled";
 import { useGetRecentNotes } from "../../hooks/api.hooks";
@@ -13,7 +20,7 @@ export const Recents = () => {
     useGetRecentNotes();
 
   return (
-    <Stack spacing={theme.spacing(1)} width="100%">
+    <Stack spacing={theme.spacing(1)} width="100%" height={"100%"}>
       <Typography variant="h5" color={theme.palette.text.secondary}>
         Recents
       </Typography>
@@ -30,37 +37,48 @@ export const Recents = () => {
       >
         {recentnotesLoading ? (
           <NoteSkeleton />
+        ) : recentnotes?.recentNotes.length === 0 ? (
+          <Stack
+            justifyContent="center"
+            alignItems="center"
+            height={theme.spacing(10)}
+            spacing={theme.spacing(0.5)}
+          >
+            <Typography
+              variant="body1"
+              color={alpha(theme.palette.text.secondary, 0.5)}
+              textAlign="center"
+            >
+              Start editing notes to see them here
+            </Typography>
+          </Stack>
         ) : (
-          recentnotes?.recentNotes.map((note) => {
-            return (
-              <StyledStack
-                direction="row"
-                spacing={theme.spacing(2)}
-                key={note.note.id}
-                onClick={() =>
-                  navigate(
-                    `folders/${note.note.folder.id}/notes/${note.note.id}`
-                  )
-                }
-                sx={{
-                  bgcolor:
-                    note.note.id === noteid
-                      ? theme.palette.secondary.main
-                      : "transparent",
-                }}
-              >
-                <Box
-                  component="img"
-                  width={theme.spacing(2.5)}
-                  height={theme.spacing(2.5)}
-                  src={file}
-                ></Box>
-                <Typography variant="h6" color={theme.palette.text.secondary}>
-                  {note.note.name}
-                </Typography>
-              </StyledStack>
-            );
-          })
+          recentnotes?.recentNotes.map((note) => (
+            <StyledStack
+              direction="row"
+              spacing={theme.spacing(2)}
+              key={note.note.id}
+              onClick={() =>
+                navigate(`folders/${note.note.folder.id}/notes/${note.note.id}`)
+              }
+              sx={{
+                bgcolor:
+                  note.note.id === noteid
+                    ? theme.palette.secondary.main
+                    : "transparent",
+              }}
+            >
+              <Box
+                component="img"
+                width={theme.spacing(2.5)}
+                height={theme.spacing(2.5)}
+                src={file}
+              />
+              <Typography variant="h6" color={theme.palette.text.secondary}>
+                {note.note.name}
+              </Typography>
+            </StyledStack>
+          ))
         )}
       </Stack>
     </Stack>

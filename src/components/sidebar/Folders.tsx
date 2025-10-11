@@ -1,4 +1,11 @@
-import { Box, Stack, TextField, Typography, useTheme } from "@mui/material";
+import {
+  alpha,
+  Box,
+  Stack,
+  TextField,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { addFolderIcon, folderIcon } from "../../assets";
 import { StyledIconButton } from "../../uiComponents/StyledIconButton";
 import { StyledStack } from "../../uiComponents/StyledStack";
@@ -96,7 +103,7 @@ export const Folders = () => {
   };
 
   return (
-    <Stack spacing={theme.spacing(1)} width="100%">
+    <Stack spacing={theme.spacing(1)} width="100%" height={"100%"}>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         {isCreatNewFolder ? (
           <TextField
@@ -150,6 +157,21 @@ export const Folders = () => {
       >
         {folderListLoading ? (
           <NoteSkeleton />
+        ) : folderList?.length === 0 ? (
+          <Stack
+            justifyContent="center"
+            alignItems="center"
+            height={theme.spacing(10)}
+            spacing={theme.spacing(0.5)}
+          >
+            <Typography
+              variant="body1"
+              color={alpha(theme.palette.text.secondary, 0.5)}
+              textAlign="center"
+            >
+              click + icon to create a new folder
+            </Typography>
+          </Stack>
         ) : (
           folderList?.map((folder) => (
             <StyledStack

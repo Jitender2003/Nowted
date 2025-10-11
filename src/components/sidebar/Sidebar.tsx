@@ -69,8 +69,8 @@ export const Sidebar = () => {
     createNote(
       {
         folderid,
-        name: "Title",
-        content: "Start Typing...",
+        name: "Title ...",
+        content: "Edit your note content ...",
       },
       {
         onSuccess: (data) => {
@@ -228,7 +228,8 @@ export const Sidebar = () => {
             disabled={
               location.pathname.includes("trash") ||
               location.pathname.includes("archived") ||
-              location.pathname.includes("favorite")
+              location.pathname.includes("favorite") ||
+              !folderid
             }
             sx={{
               "&.Mui-disabled": {

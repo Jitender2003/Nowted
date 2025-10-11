@@ -13,6 +13,7 @@ import { useAuth } from "../context/AuthContext";
 import { Login } from "../components/login-signup/Login";
 import { Signup } from "../components/login-signup/Signup";
 import { AuthProvider } from "../context/AuthProvider";
+import { PlaceholderMainSection } from "../components/sidebar/PlaceholderMainSection";
 
 // Layout components
 const AppLayout = () => {
@@ -59,6 +60,9 @@ export const Layout = () => {
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/Nowted" element={<AppLayout />}>
+              {/* home route */}
+              <Route index element={<PlaceholderMainSection />} />
+
               {/* Folders */}
               <Route path="folders/:folderid" element={<FolderAndNote />}>
                 <Route path="notes/:noteid" element={<FolderAndNote />} />
