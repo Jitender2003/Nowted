@@ -47,6 +47,15 @@ const ProtectedRoute = () => {
   return <Outlet />;
 };
 
+// PublicRoute wrapper
+const PublicRoute = () => {
+  const { isAuthenticated } = useAuth();
+
+  if (isAuthenticated) return <Navigate to="/Nowted" replace />;
+
+  return <Outlet />;
+};
+
 // Main Layout
 export const Layout = () => {
   return (
@@ -54,8 +63,10 @@ export const Layout = () => {
       <BrowserRouter>
         <Routes>
           {/* Public routes */}
-          <Route path="/Nowted/login" element={<Login />} />
-          <Route path="/Nowted/signup" element={<Signup />} />
+          <Route element={<PublicRoute />}>
+            <Route path="/Nowted/login" element={<Login />} />
+            <Route path="/Nowted/signup" element={<Signup />} />
+          </Route>
 
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>

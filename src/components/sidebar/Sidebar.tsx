@@ -7,6 +7,7 @@ import {
   ListItemText,
   MenuItem,
   Paper,
+  Popover,
   Select,
   Stack,
   TextField,
@@ -14,6 +15,10 @@ import {
   useTheme,
   type SelectChangeEvent,
 } from "@mui/material";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LogoutIcon from "@mui/icons-material/Logout";
+import EditIcon from "@mui/icons-material/Edit";
+import { alpha } from "@mui/material/styles";
 import { addIcon, logo, searchIcon } from "../../assets";
 import { Recents } from "./Recents";
 import { Folders } from "./Folders";
@@ -34,6 +39,7 @@ export const Sidebar = () => {
   const { folderid } = useParams<{ folderid: string }>();
   const [searchText, setSearchText] = useState<string>("");
   const { noteid } = useParams<{ noteid: string }>();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const appTheme = useThemeStore((state) => state.theme);
   const updateThemeChange = useThemeStore((state) => state.setTheme);
@@ -54,6 +60,26 @@ export const Sidebar = () => {
 
   const { mutate: createNote } = useCreateNewNote();
   const navigate = useNavigate();
+
+  const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleProfileClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleEditProfile = () => {
+    // Add your edit profile logic here
+    console.log("Edit profile clicked");
+    handleProfileClose();
+  };
+
+  const handleLogout = () => {
+    // Add your logout logic here
+    console.log("Logout clicked");
+    handleProfileClose();
+  };
 
   const handleAppThemeChange = (e: SelectChangeEvent) => {
     updateThemeChange(e.target.value);
@@ -110,6 +136,9 @@ export const Sidebar = () => {
     }
   }, [noteData, searchText]);
 
+  const open = Boolean(anchorEl);
+  const id = open ? "profile-popover" : undefined;
+
   return (
     <Stack
       width="20vw"
@@ -127,7 +156,39 @@ export const Sidebar = () => {
         alignItems="center"
         width="100%"
       >
-        <Box component="img" src={logo}></Box>
+        <Stack spacing={1} direction="row">
+          <Box
+            component={StyledIconButton}
+            onClick={handleProfileClick}
+            aria-describedby={id}
+            sx={{
+              p: 0,
+              bgcolor: "transparent",
+              borderRadius: "50%",
+              minWidth: 0,
+            }}
+          >
+            <AccountCircleIcon
+              sx={{
+                bgcolor: alpha(theme.palette.secondary.main, 0.6),
+                color: theme.palette.text.primary,
+                borderRadius: "50%",
+                height: theme.spacing(3.5),
+                width: theme.spacing(3.5),
+                border: `${theme.spacing(0.1)} solid ${
+                  theme.palette.secondary.main
+                }`,
+                cursor: "pointer",
+                "&:hover": {
+                  backgroundColor: alpha(theme.palette.secondary.main, 0.3),
+                  opacity: 0.9,
+                },
+              }}
+            />
+          </Box>
+
+          <Box component="img" src={logo} height={theme.spacing(3.5)}></Box>
+        </Stack>
         <StyledIconButton onClick={handleSearch}>
           <Box
             component="img"
@@ -144,6 +205,130 @@ export const Sidebar = () => {
           />
         </StyledIconButton>
       </Stack>
+
+      {/* Profile Menu Popover */}
+      <Popover
+        id={id}
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleProfileClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        sx={{
+          "& .MuiPopover-paper": {
+            backgroundColor: "rgba(255, 255, 255, 0.06)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: theme.spacing(1.5),
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
+            overflow: "hidden",
+            marginTop: theme.spacing(1),
+            minWidth: theme.spacing(20),
+          },
+        }}
+      >
+        <List
+          sx={{
+            padding: theme.spacing(1),
+            display: "flex",
+            flexDirection: "column",
+            gap: theme.spacing(0.5),
+          }}
+        >
+          <ListItem
+            disablePadding
+            sx={{
+              borderRadius: theme.spacing(1),
+              transition: "all 0.3s ease",
+
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.12)",
+                transform: "scale(1.02)",
+              },
+              "&.Mui-focusVisible": {
+                backgroundColor: "none",
+                outline: "none",
+              },
+            }}
+          >
+            <ListItemButton
+              onClick={handleEditProfile}
+              sx={{
+                padding: theme.spacing(1.2),
+                borderRadius: theme.spacing(1),
+                fontWeight: 500,
+                color: theme.palette.text.primary,
+                transition: "all 0.3s ease",
+              }}
+            >
+              <EditIcon
+                sx={{
+                  marginRight: theme.spacing(1.5),
+                  fontSize: theme.spacing(2.5),
+                  color: theme.palette.text.secondary,
+                }}
+              />
+              <ListItemText
+                primary={
+                  <Typography variant="h4" color={theme.palette.text.primary}>
+                    Edit Profile
+                  </Typography>
+                }
+              />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem
+            disablePadding
+            sx={{
+              borderRadius: theme.spacing(1),
+              transition: "all 0.3s ease",
+
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.12)",
+                transform: "scale(1.02)",
+              },
+              "&.Mui-focusVisible": {
+                backgroundColor: "none",
+                outline: "none",
+              },
+            }}
+          >
+            <ListItemButton
+              onClick={handleLogout}
+              sx={{
+                padding: theme.spacing(1.2),
+                borderRadius: theme.spacing(1),
+                fontWeight: 500,
+                color: theme.palette.text.primary,
+                transition: "all 0.3s ease",
+              }}
+            >
+              <LogoutIcon
+                sx={{
+                  marginRight: theme.spacing(1.5),
+                  fontSize: theme.spacing(2.5),
+                  color: theme.palette.text.secondary,
+                }}
+              />
+              <ListItemText
+                primary={
+                  <Typography variant="h4" color={theme.palette.text.primary}>
+                    Log Out
+                  </Typography>
+                }
+              />
+            </ListItemButton>
+          </ListItem>
+        </List>
+      </Popover>
 
       <Stack spacing={theme.spacing(1.5)} position="relative">
         {isSearch ? (
